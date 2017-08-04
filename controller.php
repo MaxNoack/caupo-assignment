@@ -9,6 +9,10 @@ $api_connection = new classes_api_connection(
 );
 $field_validation = new classes_field_validation();
 
-$api_connection->get_product();
+try {
+	$api_connection->save_product();
+} catch(Exception $e) {
+	echo "Can't retrieve api data. Curl error: " . $e->getMessage();
+}
 
 ?>

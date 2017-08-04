@@ -31,19 +31,12 @@ class classes_api_connection {
 	 * @return string
 	 */
 	public function get_product() {
-		$data = array("username" => $this->user_name, "password" => $this->password);
-		$data_string = json_encode($data);
-		$ch = curl_init($this->admin_url);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-		'Content-Type: application/json',
-		'Content-Length: ' . strlen($data_string))
-		);
-		$token = curl_exec($ch);
-		$token = json_decode($token);
-
+		$token = "";
+		try {
+			$token = $this->get_api_token();
+		} catch(Exception $e) {
+			echo "Can't retrieve api token. Curl error: " . $e->getMessage();
+		}
 		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/V1/products/trollet-1337';
 		$ch = curl_init($requestUrl);
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
@@ -55,7 +48,11 @@ class classes_api_connection {
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 		$result = curl_exec($ch);
+		if(curl_errno($ch)){
+			throw new Exception(curl_error($ch));
+		}
 		print_r(json_decode($result));
+		return json_decode($result);
 	}
 
 	/**
@@ -65,7 +62,38 @@ class classes_api_connection {
 	 * @return array
 	 */
 	public function save_product() {
+		$token = "";
+		try {
+			$token = $this->get_api_token();
+		} catch(Exception $e) {
+			echo "Can't retrieve api token. Curl error: " . $e->getMessage();
+		}
 
+		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/all/V1/products/trollet-1337';
+		$ch = curl_init($requestUrl);
+		$post = array(
+			"product" => array(
+			"name" => "New name for Product",
+			"price" => 123,
+			),
+			"saveOptions" => true
+		);
+		$post_string = json_encode($post);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_string);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers = array(
+			'Content-Type: application/json',
+			'Authorization: Bearer ' . $token,
+			'Content-Length: ' . strlen($post_string))
+		);
+
+		$result = curl_exec($ch);
+		if(curl_errno($ch)){
+			throw new Exception(curl_error($ch));
+		}
+		print_r(json_decode($result));
+		#return json_decode($result);
 	}
 
 	/**
@@ -76,6 +104,33 @@ class classes_api_connection {
 	 */
 	public function delete_product() {
 		return true;
+	}
+
+	/**
+	 * Retrieve API token
+	 *
+	 * @param int $store_id
+	 * @return array
+	 */
+	public function get_api_token() {
+		$data = array(
+			"username" => $this->user_name,
+			"password" => $this->password
+		);
+		$data_string = json_encode($data);
+		$ch = curl_init($this->admin_url);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+		'Content-Type: application/json',
+		'Content-Length: ' . strlen($data_string))
+		);
+		$token = curl_exec($ch);
+		if(curl_errno($ch)){
+			throw new Exception(curl_error($ch));
+		}
+		return json_decode($token);
 	}
 }
 

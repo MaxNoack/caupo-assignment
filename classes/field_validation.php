@@ -4,20 +4,15 @@
  * Controller for LSPF admin page
  */
 class classes_field_validation {
-	/**
-	 * @var Admin_Agent_CompanyInfoRepository
-	 */
-	private $something;
 
 	/**
-     * Constructor
-     *
-	 * @param Net_Http_Request|null $request
-	 * @param prisjakt_mysqli|null  $db
-	 * @param string                $wrapper
+	 * Retrieves a product
+	 *
+	 * @param int $store_id
+	 * @return string
 	 */
-	public function __construct() {
-		//some code
+	public function validate_name($name) {
+		return !empty($name);
 	}
 
 	/**
@@ -26,8 +21,8 @@ class classes_field_validation {
 	 * @param int $store_id
 	 * @return string
 	 */
-	public function validate_sku() {
-		return true;
+	public function validate_sku($sku) {
+		return !empty($sku);
 	}
 
 	/**
@@ -36,8 +31,11 @@ class classes_field_validation {
 	 * @param int $store_id
 	 * @return array
 	 */
-	public function validate_price() {
-		return true;
+	public function validate_price($price) {
+		if (!empty($price)) {
+			return preg_match('%^[+]?(?:[.]\d+|\d+(?:[.]\d+)?)$%', $price);
+		}
+		return false;
 	}
 
 }

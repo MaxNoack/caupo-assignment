@@ -30,14 +30,14 @@ class classes_api_connection {
 	 * @param int $store_id
 	 * @return string
 	 */
-	public function get_product() {
+	public function get_product($sku) {
 		$token = "";
 		try {
 			$token = $this->get_api_token();
 		} catch(Exception $e) {
 			echo "Can't retrieve api token. Curl error: " . $e->getMessage();
 		}
-		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/V1/products/trollet-1337';
+		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/V1/products/' . $sku;
 		$ch = curl_init($requestUrl);
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -56,12 +56,14 @@ class classes_api_connection {
 	}
 
 	/**
-	 * Saves a product
+	 * Saves a product. If it doesn't exist, create it.
 	 *
-	 * @param int $store_id
+	 * @param int $sku
+	 * @param int $name
+	 * @param int $price
 	 * @return array
 	 */
-	public function save_product() {
+	public function create_new_product($sku, $name, $price) {
 		$token = "";
 		try {
 			$token = $this->get_api_token();
@@ -69,18 +71,19 @@ class classes_api_connection {
 			echo "Can't retrieve api token. Curl error: " . $e->getMessage();
 		}
 
-		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/all/V1/products/trollet-1337';
+		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/V1/products';
 		$ch = curl_init($requestUrl);
 		$post = array(
 			"product" => array(
-			"name" => "New name for Product",
-			"price" => 123,
-			),
-			"saveOptions" => true
+				"sku" => $sku,
+				"name" => $name,
+				"price" => $price
+			)
 		);
 		$post_string = json_encode($post);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_string);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers = array(
 			'Content-Type: application/json',
@@ -92,8 +95,55 @@ class classes_api_connection {
 		if(curl_errno($ch)){
 			throw new Exception(curl_error($ch));
 		}
+		else {
+			echo "New product has been created";
+		}
 		print_r(json_decode($result));
-		#return json_decode($result);
+	}
+
+	/**
+	 * Saves an existing product.
+	 *
+	 * @param int $sku
+	 * @param int $name
+	 * @param int $price
+	 * @return array
+	 */
+	public function save_product($sku, $name, $price) {
+		$token = "";
+		try {
+			$token = $this->get_api_token();
+		} catch(Exception $e) {
+			echo "Can't retrieve api token. Curl error: " . $e->getMessage();
+		}
+
+		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/V1/products/' . $sku;
+		$ch = curl_init($requestUrl);
+		$post = array(
+			"product" => array(
+				"sku" => $sku,
+				"name" => $name,
+				"price" => $price
+			)
+		);
+		$post_string = json_encode($post);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_string);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers = array(
+			'Content-Type: application/json',
+			'Authorization: Bearer ' . $token,
+			'Content-Length: ' . strlen($post_string))
+		);
+
+		json_decode(curl_exec($ch));
+		if(curl_error($ch)){
+			throw new Exception(curl_error($ch));
+		}
+		else {
+			echo "Product with sku: " . $sku . " has been updated";
+		}
 	}
 
 	/**
@@ -102,8 +152,32 @@ class classes_api_connection {
 	 * @param int $store_id
 	 * @return array
 	 */
-	public function delete_product() {
-		return true;
+	public function delete_product($sku) {
+		$token = "";
+		try {
+			$token = $this->get_api_token();
+		} catch(Exception $e) {
+			echo "Can't retrieve api token. Curl error: " . $e->getMessage();
+		}
+
+		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/V1/products/' . $sku;
+		$ch = curl_init($requestUrl);
+
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			'Authorization: Bearer ' . $token
+		));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+		json_decode(curl_exec($ch));
+		// Something with the request crashed, return error to the browser
+		if(curl_error($ch))
+		{
+			throw new Exception(curl_error($ch));
+		}
+		else {
+			echo "Product with sku: " . $sku . " has been deleted";
+		}
 	}
 
 	/**

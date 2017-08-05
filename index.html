@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="assets/styles.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+	<script src="assets/main.js"></script>
+
+
+	<title>Caupo Assignment</title>
+</head>
+<body>
+	<div class="container">
+	<div class="col-md-8 col-md-offset-2">
+		<h2>Edit store products</h2>
+		<p><span class="error">* Required</span></p>
+
+		<div class="form-group">
+			<label for="Name"><span class="error">*</span> Name</label>
+			<input type="text" id="name" name="name" class="form-control" id="Name" placeholder="Product name">
+			<small class="form-text text-muted">Full name of the product</small>
+		</div>
+
+		<div class="form-group">
+			<label for="sku"><span class="error">*</span> Sku</label>
+			<input type="text" id="sku" name="sku" class="form-control" id="sku" placeholder="Sku">
+			<small class="form-text text-muted">Unique product id</small>
+		</div>
+
+		<div class="form-group">
+			<label for="price"><span class="error">*</span> Price</label>
+			<input type="text" id="price" name="price" class="form-control" id="price" placeholder="Price">
+			<small class="form-text text-muted">Price in SEK with VAT included</small>
+		</div>
+
+		<div class="form-group">
+			<label for="price" control-label"></label>
+				<button class="btn btn-success" onclick="submitAdd();" value="Update or add product">
+					Update or add the product
+				</button>
+				<button class="btn btn-danger" onclick="submitDelete();" value="Delete product">
+					Delete product
+				</button>
+		</div>
+<p id="demo"></p>
+		<div class="alert alert-danger" id="error-all-fields" role="alert" style="display: none;">Empty fields detected</div>
+		<div class="alert alert-danger" id="error-sku-field" role="alert" style="display: none;">Invalid sku</div>
+		<div class="alert alert-danger" id="error-price-field" role="alert" style="display: none;">Invalid price</div>
+		<div class="alert alert-danger" id="error-empty-fields" role="alert" style="display: none;">Make shure all fields are set</div>
+		<div class="alert alert-danger" id="backend-error" role="alert" style="display: none;"></div>
+		<div class="alert alert-success" id="success" role="alert" style="display: none;"></div>
+
+	</div>
+	</div>
+</body>
+</html>

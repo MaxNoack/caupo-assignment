@@ -7,9 +7,9 @@ try {
 
 	//create connection object
 	$api_connection = new classes_api_connection(
-		"http://lab.magento2.caupo.se/index.php/rest/V1/integration/admin/token",
-		"demo",
-		"demo123"
+		"tokenurl",
+		"username",
+		"password"
 	);
 
 	//Check if sku exists

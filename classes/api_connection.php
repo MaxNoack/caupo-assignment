@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Controller for LSPF admin page
+ * Controller for Magento API calls
  */
 class classes_api_connection {
 	/**
-	 * @var Admin_Agent_CompanyInfoRepository
+	 * @var Classes_Api_Connection
 	 */
 	protected $admin_url;
 	protected $user_name;
@@ -14,9 +14,9 @@ class classes_api_connection {
 	/**
 	 * Constructor
 	 *
-	 * @param Net_Http_Request|null $request
-	 * @param prisjakt_mysqli|null  $db
-	 * @param string				$wrapper
+	 * @param string $admin_url
+	 * @param string $user_name
+	 * @param string $password
 	 */
 	public function __construct($admin_url, $user_name, $password) {
 		$this->admin_url = $admin_url;
@@ -27,16 +27,13 @@ class classes_api_connection {
 	/**
 	 * Retrieves a product
 	 *
-	 * @param int $store_id
-	 * @return string
+	 * @param string $sku
+	 * @return array
 	 */
 	public function get_product($sku) {
 		$token = "";
-		try {
-			$token = $this->get_api_token();
-		} catch(Exception $e) {
-			echo "Can't retrieve api token. Curl error: " . $e->getMessage();
-		}
+		$token = $this->get_api_token();
+		
 		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/V1/products/' . $sku;
 		$ch = curl_init($requestUrl);
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
@@ -48,28 +45,23 @@ class classes_api_connection {
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 		$result = curl_exec($ch);
+		//If curl didn't succed, send error
 		if(curl_errno($ch)){
 			throw new Exception(curl_error($ch));
 		}
-		print_r(json_decode($result));
 		return json_decode($result);
 	}
 
 	/**
-	 * Saves a product. If it doesn't exist, create it.
+	 * Create new product
 	 *
-	 * @param int $sku
-	 * @param int $name
-	 * @param int $price
-	 * @return array
+	 * @param string $sku
+	 * @param string $name
+	 * @param float $price
 	 */
 	public function create_new_product($sku, $name, $price) {
 		$token = "";
-		try {
-			$token = $this->get_api_token();
-		} catch(Exception $e) {
-			echo "Can't retrieve api token. Curl error: " . $e->getMessage();
-		}
+		$token = $this->get_api_token();
 
 		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/V1/products';
 		$ch = curl_init($requestUrl);
@@ -77,13 +69,15 @@ class classes_api_connection {
 			"product" => array(
 				"sku" => $sku,
 				"name" => $name,
-				"price" => $price
+				"price" => $price,
+				'visibility' => 4,
+				'type_id' => 'simple',
+				'attribute_set_id' => 4,
 			)
 		);
 		$post_string = json_encode($post);
-		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_string);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers = array(
 			'Content-Type: application/json',
@@ -92,30 +86,31 @@ class classes_api_connection {
 		);
 
 		$result = curl_exec($ch);
+		//If curl didn't succed, send error
 		if(curl_errno($ch)){
 			throw new Exception(curl_error($ch));
 		}
+		//Everything went fine, inform the user
 		else {
-			echo "New product has been created";
+			echo json_encode(
+				array(
+					"Error" => false,
+					"info" => "New product has been created",
+				)
+			);
 		}
-		print_r(json_decode($result));
 	}
 
 	/**
 	 * Saves an existing product.
 	 *
-	 * @param int $sku
-	 * @param int $name
-	 * @param int $price
-	 * @return array
+	 * @param string $sku
+	 * @param string $name
+	 * @param float $price
 	 */
 	public function save_product($sku, $name, $price) {
 		$token = "";
-		try {
-			$token = $this->get_api_token();
-		} catch(Exception $e) {
-			echo "Can't retrieve api token. Curl error: " . $e->getMessage();
-		}
+		$token = $this->get_api_token();
 
 		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/V1/products/' . $sku;
 		$ch = curl_init($requestUrl);
@@ -127,7 +122,6 @@ class classes_api_connection {
 			)
 		);
 		$post_string = json_encode($post);
-		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_string);
@@ -138,27 +132,29 @@ class classes_api_connection {
 		);
 
 		json_decode(curl_exec($ch));
+		//If curl didn't succed, send error
 		if(curl_error($ch)){
 			throw new Exception(curl_error($ch));
 		}
+		//Everything went fine, inform the user
 		else {
-			echo "Product with sku: " . $sku . " has been updated";
+			echo json_encode(
+				array(
+					"Error" => false,
+					"info" => "Product with sku <b>" . $sku . "</b> has been updated",
+				)
+			);
 		}
 	}
 
 	/**
 	 * Deletes a product
 	 *
-	 * @param int $store_id
-	 * @return array
+	 * @param string $sku
 	 */
 	public function delete_product($sku) {
 		$token = "";
-		try {
-			$token = $this->get_api_token();
-		} catch(Exception $e) {
-			echo "Can't retrieve api token. Curl error: " . $e->getMessage();
-		}
+		$token = $this->get_api_token();
 
 		$requestUrl = 'http://lab.magento2.caupo.se/index.php/rest/V1/products/' . $sku;
 		$ch = curl_init($requestUrl);
@@ -170,20 +166,25 @@ class classes_api_connection {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 		json_decode(curl_exec($ch));
-		// Something with the request crashed, return error to the browser
+		//If curl didn't succed, send error
 		if(curl_error($ch))
 		{
 			throw new Exception(curl_error($ch));
 		}
+		//Everything went fine, inform the user
 		else {
-			echo "Product with sku: " . $sku . " has been deleted";
+			echo json_encode(
+				array(
+					"Error" => false,
+					"info" => "Product with sku <b>" . $sku . "</b> has been deleted",
+				)
+			);
 		}
 	}
 
 	/**
 	 * Retrieve API token
 	 *
-	 * @param int $store_id
 	 * @return array
 	 */
 	public function get_api_token() {

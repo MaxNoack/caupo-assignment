@@ -1,24 +1,25 @@
 <?php
 require_once('classes/api_connection.php');
 
-
-$name = $_POST['name'];
-$sku = $_POST['sku'];
-$price = $_POST['price'];
-$action_type = $_POST['action_type'];
-
-die("det gick" . $_POST['action_type'];);
 try {
+	$sku = $_POST['sku'];
+	$action_type = $_POST['action_type'];
+
+	//create connection object
 	$api_connection = new classes_api_connection(
 		"http://lab.magento2.caupo.se/index.php/rest/V1/integration/admin/token",
 		"demo",
 		"demo123"
 	);
-	if ($action_type = "add_product") {
 
-		//Check if sku exists
-		if ($api_connection->get_product($sku)) {
-			die("yeees!");
+	//Check if sku exists
+	$product_exists = $api_connection->get_product($sku);
+
+	//If Update/add is clicked
+	if ($action_type == "add_product") {
+		$name = $_POST['name'];
+		$price = $_POST['price'];
+		if (isset($product_exists->sku)) {
 			$api_connection->save_product($sku, $name, $price);
 		}
 		else {
@@ -26,15 +27,26 @@ try {
 		}
 	}
 
-	if ($action_type = "delete_product") {
-		echo "hej";
-		$api_connection->delete_product();
+	//If delete is clicked
+	if ($action_type == "delete_product") {
+		if (isset($product_exists->sku)) {
+			$api_connection->delete_product($sku);
+		}
+		else {
+			echo json_encode(
+				array(
+					"Error" => true,
+					"info" => "Product with sku <b>" . $sku . "</b> doesn't exist",
+				)
+			);
+		}
 	}
+//Through error if there's no access to the server
 } catch(Exception $e) {
 	echo json_encode(
 		array(
 			"Error" => true,
-			"error_string" => "Can't retrieve api data. Error: " . $e->getMessage(),
+			"info" => "Can't retrieve API data",
 		)
 	);
 }

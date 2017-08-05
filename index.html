@@ -38,21 +38,21 @@
 
 		<div class="form-group">
 			<label for="price" control-label"></label>
-				<button class="btn btn-success" onclick="submitAdd();" value="Update or add product">
-					Update or add the product
+				<button class="btn btn-success" id="update_button" onclick="submitAdd();">
+					Update or add product
 				</button>
-				<button class="btn btn-danger" onclick="submitDelete();" value="Delete product">
+				<button class="btn btn-danger" id="delete_button" onclick="submitDelete();">
 					Delete product
 				</button>
 		</div>
-<p id="demo"></p>
+		<div id="loader"></div>
+
 		<div class="alert alert-danger" id="error-all-fields" role="alert" style="display: none;">Empty fields detected</div>
 		<div class="alert alert-danger" id="error-sku-field" role="alert" style="display: none;">Invalid sku</div>
 		<div class="alert alert-danger" id="error-price-field" role="alert" style="display: none;">Invalid price</div>
 		<div class="alert alert-danger" id="error-empty-fields" role="alert" style="display: none;">Make shure all fields are set</div>
 		<div class="alert alert-danger" id="backend-error" role="alert" style="display: none;"></div>
 		<div class="alert alert-success" id="success" role="alert" style="display: none;"></div>
-
 	</div>
 	</div>
 </body>
